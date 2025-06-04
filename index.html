@@ -1,66 +1,62 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>Data Google Sheets dengan DataTables</title>
-  <!-- DataTables CSS -->
-  <link 
-    rel="stylesheet" 
-    href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" 
-  />
+  <meta charset="UTF-8">
+  <title>Data Google Sheets</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: sans-serif;
     }
-    h2 {
-      margin-bottom: 20px;
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background: #f2f2f2;
     }
   </style>
 </head>
 <body>
 
-<h2>Data dari Google Sheets (CSV)</h2>
-
-<table id="myTable" class="display" style="width:100%">
+<h2>Data dari Google Sheets</h2>
+<table id="data-table">
   <thead></thead>
   <tbody></tbody>
 </table>
-
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<!-- PapaParse untuk parsing CSV -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <script>
   const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv";
 
   fetch(csvUrl)
-    .then(response => response.text())
-    .then(csvText => {
-      // Parsing CSV dengan PapaParse
-      const parsed = Papa.parse(csvText, {
-        header: true,  // gunakan header sebagai nama kolom
-        skipEmptyLines: true,
-      });
+    .then(res => res.text())
+    .then(csv => {
+      const lines = csv.trim().split('\n');
+      const table = document.getElementById('data-table');
+      const thead = table.querySelector('thead');
+      const tbody = table.querySelector('tbody');
 
-      const data = parsed.data;
-      const columns = Object.keys(data[0]).map(col => ({ title: col, data: col }));
-
-      // Inisialisasi DataTables
-      $('#myTable').DataTable({
-        data: data,
-        columns: columns,
-        pageLength: 10,
-        lengthMenu: [5, 10, 25, 50],
-        responsive: true,
+      const headers = lines[0].split(',');
+      const headerRow = document.createElement('tr');
+      headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
       });
-    })
-    .catch(error => {
-      console.error("Gagal load CSV:", error);
-      document.body.innerHTML += "<p>Gagal memuat data. Cek konsol untuk detail.</p>";
+      thead.appendChild(headerRow);
+
+      for (let i = 1; i < lines.length; i++) {
+        const row = document.createElement('tr');
+        const cells = lines[i].split(',');
+        cells.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          row.appendChild(td);
+        });
+        tbody.appendChild(row);
+      }
     });
 </script>
 
