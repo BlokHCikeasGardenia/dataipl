@@ -8,37 +8,56 @@
       font-family: Arial, sans-serif;
       font-size: 12px;
       padding: 20px;
-      background: #f0fdf4;
+      background: #ffffff;
     }
     h2 {
       text-align: center;
       color: #2e7d32;
     }
+
     .table-container {
       overflow-x: auto;
-      margin-bottom: 20px;
+      position: relative;
     }
+
     table {
       border-collapse: collapse;
       width: 100%;
-      background: #e8f5e9;
       min-width: 600px;
     }
+
     th, td {
-      border: 1px solid #a5d6a7;
+      border: 1px solid #ccc;
       padding: 6px 10px;
-      text-align: left;
+      background-color: white;
+      white-space: nowrap;
     }
+
     th {
       background-color: #66bb6a;
       color: white;
       position: sticky;
       top: 0;
+      z-index: 2;
+    }
+
+    /* Sticky visible columns ke-2 dan ke-3 */
+    td.sticky-col-1, th.sticky-col-1 {
+      position: sticky;
+      left: 0;
       z-index: 1;
     }
-    tr:nth-child(even) {
-      background-color: #f1f8e9;
+
+    td.sticky-col-2, th.sticky-col-2 {
+      position: sticky;
+      left: 120px; /* sesuaikan dengan lebar kolom pertama */
+      z-index: 1;
     }
+
+    tr:nth-child(even) td {
+      background-color: #ffffff;
+    }
+
     input[type="text"] {
       padding: 5px;
       width: 100%;
@@ -46,14 +65,17 @@
       margin-bottom: 10px;
       font-size: 12px;
     }
+
     select {
       font-size: 12px;
       padding: 3px;
     }
+
     .pagination {
       margin-top: 10px;
       font-size: 12px;
     }
+
     .pagination button {
       margin-right: 5px;
       padding: 4px 8px;
@@ -81,7 +103,10 @@
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv";
 
-    let allFullRows = []; // menyimpan semua data (untuk search)
+    let allDataRaw = [];
+    let allDataVisible = [];
+    let headerVisible = [];
+    let visibleCols = [];
     let currentPage = 1;
     let rowsPerPage = 10;
 
@@ -97,10 +122,16 @@
         const header = rows[0];
         const data = rows.slice(1);
 
-        allFullRows = data;
+        // Kolom yang disembunyikan dari tampilan (0 & 3), tapi tetap searchable
+        visibleCols = header.map((_, i) => i).filter(i => i !== 0 && i !== 3);
 
-        renderTable(header, data);
-        setupEvents(header);
+        headerVisible = visibleCols.map(i => header[i]);
+        allDataRaw = data;
+
+        allDataVisible = data.map(row => visibleCols.map(i => row[i]));
+
+        renderTable(headerVisible, allDataVisible);
+        setupEvents();
       });
 
     function renderTable(header, data) {
@@ -108,14 +139,17 @@
       const thead = document.createElement('thead');
       const trHead = document.createElement('tr');
 
-      // Kolom yang ingin ditampilkan (selain index 0 dan 3)
-      const visibleIndexes = header.map((_, i) => i).filter(i => i !== 0 && i !== 3);
-
-      visibleIndexes.forEach(i => {
+      header.forEach((col, i) => {
         const th = document.createElement('th');
-        th.textContent = header[i];
+        th.textContent = col;
+
+        // Fixed column styling
+        if (i === 0) th.classList.add('sticky-col-1');
+        if (i === 1) th.classList.add('sticky-col-2');
+
         trHead.appendChild(th);
       });
+
       thead.appendChild(trHead);
       table.appendChild(thead);
 
@@ -124,17 +158,22 @@
       const currentData = data.slice(start, end);
 
       const tbody = document.createElement('tbody');
-      currentData.forEach(row => {
+      currentData.forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
-        visibleIndexes.forEach(i => {
+        row.forEach((cell, i) => {
           const td = document.createElement('td');
-          td.textContent = row[i];
+          td.textContent = cell;
+
+          // Fixed column styling
+          if (i === 0) td.classList.add('sticky-col-1');
+          if (i === 1) td.classList.add('sticky-col-2');
+
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
       });
-      table.appendChild(tbody);
 
+      table.appendChild(tbody);
       renderPagination(data.length);
     }
 
@@ -154,7 +193,7 @@
       }
     }
 
-    function setupEvents(header) {
+    function setupEvents() {
       searchInput.addEventListener('input', () => {
         currentPage = 1;
         applyFilters();
@@ -170,11 +209,12 @@
     function applyFilters() {
       const keyword = searchInput.value.toLowerCase();
 
-      const filtered = allFullRows.filter(row =>
+      const filtered = allDataRaw.filter(row =>
         row.some(cell => cell.toLowerCase().includes(keyword))
       );
 
-      renderTable(allFullRows[0].map((_, i) => i).map(i => ''), filtered); // render ulang, header tetap
+      allDataVisible = filtered.map(row => visibleCols.map(i => row[i]));
+      renderTable(headerVisible, allDataVisible);
     }
   </script>
 </body>
