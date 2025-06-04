@@ -32,6 +32,12 @@
       background: inherit;
       white-space: nowrap;
     }
+    /* Tambahan khusus untuk sticky kolom agar border kanan tetap muncul di atas sticky */
+    th.sticky-col-1, td.sticky-col-1,
+    th.sticky-col-2, td.sticky-col-2 {
+      box-shadow: 1px 0 0 0 #a5d6a7; /* border kanan */
+      /* border-left tetap normal, border-right diganti shadow */
+    }
     th {
       background-color: #66bb6a;
       color: #222 !important;
@@ -148,7 +154,6 @@
         th.textContent = headerRow[i];
         if (idx === 0) th.classList.add('sticky-col-1');
         if (idx === 1) th.classList.add('sticky-col-2', 'fixed-width-col');
-        if (idx === 2) ; // tidak fixed width untuk idx 2
         trHead.appendChild(th);
       });
       thead.appendChild(trHead);
@@ -166,7 +171,6 @@
           td.textContent = row[i];
           if (idx === 0) td.classList.add('sticky-col-1');
           if (idx === 1) td.classList.add('sticky-col-2', 'fixed-width-col');
-          if (idx === 2) ; // tidak fixed width untuk idx 2
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
