@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Pemasukan6</title>
+  <title>Pemasukan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -53,11 +53,13 @@
     .table-container {
       overflow-x: auto;
       overflow-y: auto;
-      max-height: 135vh; /* lebih tinggi dari sebelumnya */
-      margin-bottom: 12px;
       background: #e6f8f8;
       border-radius: 8px;
       box-shadow: 0 1px 3px rgba(100,181,183,0.07);
+      margin-bottom: 12px;
+      /* Responsive max-height: 70vh desktop, 50vh tablet, 38vh mobile */
+      max-height: 70vh;
+      transition: max-height 0.2s;
     }
     table {
       border-collapse: collapse;
@@ -137,9 +139,14 @@
       background: none;
       border: none;
     }
+    @media (max-width: 1024px) {
+      .table-container {
+        max-height: 50vh;
+      }
+    }
     @media (max-width: 700px) {
       .table-container {
-        max-height: 95vh;
+        max-height: 38vh;
       }
       table {
         font-size: 10.5px;
@@ -175,7 +182,7 @@
   </style>
 </head>
 <body>
-  <h2>Pemasukan65</h2>
+  <h2>Pemasukan</h2>
   <div class="filters">
     <input type="text" id="searchInput" placeholder="Cari di semua kolom...">
     <label for="rowsPerPage">Baris/halaman:</label>
@@ -274,13 +281,10 @@
         for (let i = 1; i <= totalPages; i++) pageList.push(i);
       } else {
         if (currentPage <= 3) {
-          // 1 2 3 4 5 ... next
           pageList = [1, 2, 3, 4, 5];
         } else if (currentPage >= totalPages - 2) {
-          // ... n-4 n-3 n-2 n-1 n
           pageList = [totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
         } else {
-          // ... prev c-2 c-1 c c+1 c+2 ... next
           pageList = [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2];
         }
       }
