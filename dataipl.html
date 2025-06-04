@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data IPL</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0fff0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #2e7d32;
+      text-align: center;
+    }
+
+    #search {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #ffffff;
+    }
+
+    th, td {
+      border: 1px solid #2e7d32;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #a5d6a7;
+      color: #1b5e20;
+    }
+
+    tr:nth-child(even) {
+      background-color: #e8f5e9;
+    }
+
+    tr:hover {
+      background-color: #c8e6c9;
+    }
+
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      th {
+        background-color: #81c784;
+        position: sticky;
+        top: 0;
+      }
+
+      td {
+        border: none;
+        border-bottom: 1px solid #ccc;
+        position: relative;
+        padding-left: 50%;
+      }
+
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: bold;
+        color: #2e7d32;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Data IPL</h1>
+  <input type="text" id="search" placeholder="Cari... (otomatis filter)">
+  <div id="table-container">Memuat data...</div>
+
+  <script>
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv";
+
+    let originalRows = [];
+
+    fetch(csvUrl)
+      .then(response => response.text())
+      .then(csv => {
+        const rows = csv.trim().split("\n").map(row => row.split(","));
+        originalRows = rows;
+        renderTable(rows);
+      })
+      .catch(error => {
+        document.getElementById("table-container").textContent = "Gagal memuat data.";
+        console.error("CSV Fetch Error:", error);
+      });
+
+    function renderTable(rows) {
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const tbody = document.createElement("tbody");
+
+      // Header
+      const headerRow = document.createElement("tr");
+      rows[0].forEach(header => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+
+      // Data rows
+      rows.slice(1).forEach(row => {
+        const tr = document.createElement("tr");
+        row.forEach((cell, i) => {
+          const td = document.createElement("td");
+          td.textContent = cell;
+          td.setAttribute("data-label", rows[0][i]);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      const container = document.getElementById("table-container");
+      container.innerHTML = "";
+      container.appendChild(table);
+    }
+
+    document.getElementById("search").addEventListener("input", function() {
+      const searchTerm = this.value.toLowerCase();
+      const filtered = originalRows.filter((row, index) => {
+        if (index === 0) return true; // keep header
+        return row.some(cell => cell.toLowerCase().includes(searchTerm));
+      });
+      renderTable(filtered);
+    });
+  </script>
+</body>
+</html>
