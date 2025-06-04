@@ -16,6 +16,8 @@
     }
     .table-container {
       overflow-x: auto;
+      overflow-y: auto;
+      max-height: 400px;
       margin-bottom: 20px;
     }
     table {
@@ -28,13 +30,26 @@
       border: 1px solid #a5d6a7;
       padding: 6px 10px;
       text-align: left;
+      background: inherit;
     }
     th {
       background-color: #66bb6a;
       color: white;
       position: sticky;
       top: 0;
-      z-index: 1;
+      z-index: 2;
+    }
+    /* Sticky kolom 2 (idx 0) dan kolom 3 (idx 1), left diatur via JS agar dinamis */
+    th.sticky-col-1, td.sticky-col-1 {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: #b2dfdb;
+    }
+    th.sticky-col-2, td.sticky-col-2 {
+      position: sticky;
+      z-index: 3;
+      background: #c8e6c9;
     }
     tr:nth-child(even) {
       background-color: #f1f8e9;
@@ -81,7 +96,7 @@
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv";
 
-    let allFullRows = []; // menyimpan semua data (untuk search)
+    let allFullRows = [];
     let header = [];
     let currentPage = 1;
     let rowsPerPage = 10;
@@ -112,9 +127,11 @@
       // Kolom yang ingin ditampilkan (selain index 0 dan 3)
       const visibleIndexes = headerRow.map((_, i) => i).filter(i => i !== 0 && i !== 3);
 
-      visibleIndexes.forEach(i => {
+      visibleIndexes.forEach((i, idx) => {
         const th = document.createElement('th');
         th.textContent = headerRow[i];
+        if (idx === 0) th.classList.add('sticky-col-1');
+        if (idx === 1) th.classList.add('sticky-col-2');
         trHead.appendChild(th);
       });
       thead.appendChild(trHead);
@@ -127,9 +144,11 @@
       const tbody = document.createElement('tbody');
       currentData.forEach(row => {
         const tr = document.createElement('tr');
-        visibleIndexes.forEach(i => {
+        visibleIndexes.forEach((i, idx) => {
           const td = document.createElement('td');
           td.textContent = row[i];
+          if (idx === 0) td.classList.add('sticky-col-1');
+          if (idx === 1) td.classList.add('sticky-col-2');
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -137,6 +156,30 @@
       table.appendChild(tbody);
 
       renderPagination(data.length);
+
+      // Atur posisi left sticky kolom 2 & 3 secara dinamis
+      setTimeout(setStickyLeft, 0);
+    }
+
+    function setStickyLeft() {
+      // Cari semua th sticky
+      const th1 = table.querySelector('th.sticky-col-1');
+      const th2 = table.querySelector('th.sticky-col-2');
+      if (!th1 || !th2) return;
+
+      const width1 = th1.offsetWidth;
+
+      // Set left untuk sticky-col-2 agar tepat setelah sticky-col-1
+      th2.style.left = width1 + "px";
+
+      // Semua td di kolom 2 dan 3
+      const trs = table.querySelectorAll('tbody tr');
+      trs.forEach(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length > 1) {
+          tds[1].style.left = width1 + 'px';
+        }
+      });
     }
 
     function renderPagination(totalRows) {
@@ -173,8 +216,11 @@
       const filtered = allFullRows.filter(row =>
         row.some(cell => cell.toLowerCase().includes(keyword))
       );
-      renderTable(header, filtered); // render ulang, header tetap
+      renderTable(header, filtered);
     }
+
+    // Agar sticky tetap rapi saat resize window
+    window.addEventListener('resize', () => setStickyLeft());
   </script>
 </body>
 </html>
