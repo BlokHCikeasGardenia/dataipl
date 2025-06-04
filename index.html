@@ -2,64 +2,182 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Data Google Sheets Live</title>
+  <title>Data IPL</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      font-size: 12px;
       padding: 20px;
-      background: #f9f9f9;
+      background: #f0fdf4;
     }
     h2 {
       text-align: center;
-      color: #333;
+      color: #2e7d32;
+    }
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 20px;
     }
     table {
       border-collapse: collapse;
       width: 100%;
-      background: #fff;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      background: #e8f5e9;
+      min-width: 600px;
     }
     th, td {
-      border: 1px solid #ddd;
-      padding: 8px 12px;
+      border: 1px solid #a5d6a7;
+      padding: 6px 10px;
       text-align: left;
     }
     th {
-      background-color: #007acc;
+      background-color: #66bb6a;
       color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
     tr:nth-child(even) {
-      background-color: #f2f2f2;
+      background-color: #f1f8e9;
+    }
+    input[type="text"] {
+      padding: 5px;
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+    select {
+      font-size: 12px;
+      padding: 3px;
+    }
+    .pagination {
+      margin-top: 10px;
+      font-size: 12px;
+    }
+    .pagination button {
+      margin-right: 5px;
+      padding: 4px 8px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
-  <h2>Data Google Sheets (Live)</h2>
-  <table id="dataTable"></table>
+  <h2>Data IPL</h2>
+
+  <input type="text" id="searchInput" placeholder="Cari...">
+  <label for="rowsPerPage">Baris per halaman:</label>
+  <select id="rowsPerPage">
+    <option value="10" selected>10</option>
+    <option value="25">25</option>
+    <option value="50">50</option>
+  </select>
+
+  <div class="table-container">
+    <table id="dataTable"></table>
+  </div>
+
+  <div class="pagination" id="pagination"></div>
 
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv";
 
+    let allRows = [];
+    let currentPage = 1;
+    let rowsPerPage = 10;
+
+    const table = document.getElementById('dataTable');
+    const pagination = document.getElementById('pagination');
+    const searchInput = document.getElementById('searchInput');
+    const rowsPerPageSelect = document.getElementById('rowsPerPage');
+
     fetch(csvUrl)
-      .then(response => response.text())
+      .then(res => res.text())
       .then(csv => {
         const rows = csv.trim().split('\n').map(row => row.split(','));
-        const table = document.getElementById('dataTable');
+        const header = rows[0];
+        const data = rows.slice(1);
 
-        rows.forEach((row, i) => {
-          const tr = document.createElement('tr');
-          row.forEach(cell => {
-            const cellElement = document.createElement(i === 0 ? 'th' : 'td');
-            cellElement.textContent = cell;
-            tr.appendChild(cellElement);
-          });
-          table.appendChild(tr);
-        });
-      })
-      .catch(error => {
-        document.getElementById('dataTable').innerHTML = '<tr><td colspan="100%">Gagal memuat data.</td></tr>';
-        console.error("Error fetching CSV:", error);
+        // Sembunyikan kolom ke-1 (index 0) dan ke-4 (index 3)
+        const visibleCols = header.map((_, i) => i).filter(i => i !== 0 && i !== 3);
+
+        // Simpan data yang sudah difilter kolomnya
+        allRows = data.map(row => visibleCols.map(i => row[i]));
+        const visibleHeader = visibleCols.map(i => header[i]);
+
+        renderTable(visibleHeader, allRows);
+        setupEvents(visibleHeader);
       });
+
+    function renderTable(header, data) {
+      table.innerHTML = '';
+      const thead = document.createElement('thead');
+      const trHead = document.createElement('tr');
+      header.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        trHead.appendChild(th);
+      });
+      thead.appendChild(trHead);
+      table.appendChild(thead);
+
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const currentData = data.slice(start, end);
+
+      const tbody = document.createElement('tbody');
+      currentData.forEach(row => {
+        const tr = document.createElement('tr');
+        row.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+
+      renderPagination(data.length);
+    }
+
+    function renderPagination(totalRows) {
+      pagination.innerHTML = '';
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.disabled = i === currentPage;
+        btn.onclick = () => {
+          currentPage = i;
+          applyFilters();
+        };
+        pagination.appendChild(btn);
+      }
+    }
+
+    function setupEvents(header) {
+      searchInput.addEventListener('input', () => {
+        currentPage = 1;
+        applyFilters();
+      });
+
+      rowsPerPageSelect.addEventListener('change', () => {
+        rowsPerPage = parseInt(rowsPerPageSelect.value);
+        currentPage = 1;
+        applyFilters();
+      });
+    }
+
+    function applyFilters() {
+      const keyword = searchInput.value.toLowerCase();
+      const filtered = allRows.filter(row =>
+        row.some(cell => cell.toLowerCase().includes(keyword))
+      );
+      renderTable(
+        Array.from(table.querySelectorAll('thead th')).map(th => th.textContent),
+        filtered
+      );
+    }
   </script>
 </body>
 </html>
