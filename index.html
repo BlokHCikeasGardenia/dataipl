@@ -32,27 +32,31 @@
       text-align: left;
       background: inherit;
     }
-    th {
-      background-color: #66bb6a;
-      color: #222 !important; /* header font hitam */
-      position: sticky;
-      top: 0;
-      z-index: 4;
-    }
-    th.sticky-col-1,
-    th.sticky-col-2 {
-      z-index: 6; /* lebih tinggi dari td sticky */
-    }
-    td.sticky-col-1,
-    td.sticky-col-2 {
-      z-index: 3;
-    }
     tr:nth-child(even) {
       background-color: #f1f8e9;
     }
     tr:nth-child(odd) {
       background-color: #e8f5e9;
     }
+    th {
+      background-color: #66bb6a;
+      color: #222 !important;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    th.sticky-col-1,
+    th.sticky-col-2 {
+      z-index: 10; /* tertinggi, supaya header sticky kolom nggak pernah ketiban */
+    }
+    td.sticky-col-1,
+    td.sticky-col-2 {
+      position: sticky;
+      z-index: 6; /* lebih tinggi dari header biasa, tapi lebih rendah dari th.sticky */
+    }
+    td.sticky-col-1 { left: 0; }
+    th.sticky-col-1 { left: 0; }
+    td.sticky-col-2, th.sticky-col-2 { /* left diatur dinamis lewat JS */ }
     input[type="text"] {
       padding: 5px;
       width: 100%;
