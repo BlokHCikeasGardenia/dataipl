@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Data IPL</title>
+  <title>Data Google Sheets Live</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -37,16 +37,14 @@
       color: #222 !important; /* header font hitam */
       position: sticky;
       top: 0;
-      z-index: 2;
+      z-index: 4;
     }
-    /* Sticky kolom 2 dan 3, left diatur via JS agar dinamis, tidak beda warna */
-    th.sticky-col-1, td.sticky-col-1 {
-      position: sticky;
-      left: 0;
-      z-index: 3;
+    th.sticky-col-1,
+    th.sticky-col-2 {
+      z-index: 6; /* lebih tinggi dari td sticky */
     }
-    th.sticky-col-2, td.sticky-col-2 {
-      position: sticky;
+    td.sticky-col-1,
+    td.sticky-col-2 {
       z-index: 3;
     }
     tr:nth-child(even) {
@@ -78,7 +76,7 @@
   </style>
 </head>
 <body>
-  <h2>Data IPL</h2>
+  <h2>Data Google Sheets (Live)</h2>
 
   <input type="text" id="searchInput" placeholder="Cari...">
   <label for="rowsPerPage">Baris per halaman:</label>
