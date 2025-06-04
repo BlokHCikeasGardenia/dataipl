@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Data IPL</title>
+  <title>Data Google Sheets Live</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -62,7 +62,7 @@
   </style>
 </head>
 <body>
-  <h2>Data IPL</h2>
+  <h2>Data Google Sheets (Live)</h2>
 
   <input type="text" id="searchInput" placeholder="Cari...">
   <label for="rowsPerPage">Baris per halaman:</label>
@@ -82,6 +82,7 @@
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv";
 
     let allFullRows = []; // menyimpan semua data (untuk search)
+    let header = [];
     let currentPage = 1;
     let rowsPerPage = 10;
 
@@ -94,26 +95,26 @@
       .then(res => res.text())
       .then(csv => {
         const rows = csv.trim().split('\n').map(row => row.split(','));
-        const header = rows[0];
+        header = rows[0];
         const data = rows.slice(1);
 
         allFullRows = data;
 
         renderTable(header, data);
-        setupEvents(header);
+        setupEvents();
       });
 
-    function renderTable(header, data) {
+    function renderTable(headerRow, data) {
       table.innerHTML = '';
       const thead = document.createElement('thead');
       const trHead = document.createElement('tr');
 
       // Kolom yang ingin ditampilkan (selain index 0 dan 3)
-      const visibleIndexes = header.map((_, i) => i).filter(i => i !== 0 && i !== 3);
+      const visibleIndexes = headerRow.map((_, i) => i).filter(i => i !== 0 && i !== 3);
 
       visibleIndexes.forEach(i => {
         const th = document.createElement('th');
-        th.textContent = header[i];
+        th.textContent = headerRow[i];
         trHead.appendChild(th);
       });
       thead.appendChild(trHead);
@@ -154,7 +155,7 @@
       }
     }
 
-    function setupEvents(header) {
+    function setupEvents() {
       searchInput.addEventListener('input', () => {
         currentPage = 1;
         applyFilters();
@@ -169,12 +170,10 @@
 
     function applyFilters() {
       const keyword = searchInput.value.toLowerCase();
-
       const filtered = allFullRows.filter(row =>
         row.some(cell => cell.toLowerCase().includes(keyword))
       );
-
-      renderTable(allFullRows[0].map((_, i) => i).map(i => ''), filtered); // render ulang, header tetap
+      renderTable(header, filtered); // render ulang, header tetap
     }
   </script>
 </body>
