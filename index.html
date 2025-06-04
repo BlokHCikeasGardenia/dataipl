@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Data Google Sheets Live</title>
+  <title>Data IPL</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -29,15 +29,8 @@
     th, td {
       border: 1px solid #a5d6a7;
       padding: 6px 10px;
-      text-align: left;
       background: inherit;
-      white-space: nowrap; /* Mencegah wrap untuk header dan isi */
-    }
-    tr:nth-child(even) {
-      background-color: #f1f8e9;
-    }
-    tr:nth-child(odd) {
-      background-color: #e8f5e9;
+      white-space: nowrap;
     }
     th {
       background-color: #66bb6a;
@@ -46,18 +39,38 @@
       top: 0;
       z-index: 5;
     }
-    th.sticky-col-1,
-    th.sticky-col-2 {
+    th.sticky-col-1, th.sticky-col-2 {
       z-index: 10;
+      text-align: left;
     }
-    td.sticky-col-1,
-    td.sticky-col-2 {
+    th:not(.sticky-col-1):not(.sticky-col-2) {
+      text-align: right;
+    }
+    td.sticky-col-1, td.sticky-col-2 {
       position: sticky;
       z-index: 6;
+      text-align: left;
     }
     td.sticky-col-1 { left: 0; }
     th.sticky-col-1 { left: 0; }
     td.sticky-col-2, th.sticky-col-2 { /* left diatur dinamis lewat JS */ }
+    td:not(.sticky-col-1):not(.sticky-col-2) {
+      text-align: right;
+    }
+    /* Kolom ke-3 (idx 2 di visibleIndexes) dibuat lebar tetap */
+    th.fixed-width-col, td.fixed-width-col {
+      width: 90px; /* 10 karakter x ~9px (Arial, 12px) */
+      min-width: 90px;
+      max-width: 90px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    tr:nth-child(even) {
+      background-color: #f1f8e9;
+    }
+    tr:nth-child(odd) {
+      background-color: #e8f5e9;
+    }
     input[type="text"] {
       padding: 5px;
       width: 100%;
@@ -81,7 +94,7 @@
   </style>
 </head>
 <body>
-  <h2>Data Google Sheets (Live)</h2>
+  <h2>Data IPL</h2>
 
   <input type="text" id="searchInput" placeholder="Cari...">
   <label for="rowsPerPage">Baris per halaman:</label>
@@ -133,8 +146,11 @@
       visibleIndexes.forEach((i, idx) => {
         const th = document.createElement('th');
         th.textContent = headerRow[i];
+        // sticky col
         if (idx === 0) th.classList.add('sticky-col-1');
         if (idx === 1) th.classList.add('sticky-col-2');
+        // fixed-width untuk kolom ke-3 di tampilan (idx === 2)
+        if (idx === 2) th.classList.add('fixed-width-col');
         trHead.appendChild(th);
       });
       thead.appendChild(trHead);
@@ -152,6 +168,7 @@
           td.textContent = row[i];
           if (idx === 0) td.classList.add('sticky-col-1');
           if (idx === 1) td.classList.add('sticky-col-2');
+          if (idx === 2) td.classList.add('fixed-width-col');
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -222,7 +239,6 @@
       renderTable(header, filtered);
     }
 
-    // Agar sticky tetap rapi saat resize window
     window.addEventListener('resize', () => setStickyLeft());
   </script>
 </body>
