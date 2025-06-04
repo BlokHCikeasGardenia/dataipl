@@ -1,209 +1,67 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tabel Data dengan Pagination & Search</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    background-color: #e6f2e6; /* hijau muda */
-    margin: 20px;
-  }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    background-color: #f9fff9;
-  }
-  th, td {
-    border: 1px solid #80b380;
-    padding: 6px 8px;
-    text-align: left;
-  }
-  th {
-    background-color: #b3d9b3;
-    color: #264d26;
-  }
-  tr:nth-child(even) {
-    background-color: #e6f2e6;
-  }
-  tr:hover {
-    background-color: #cce5cc;
-  }
-  #searchInput {
-    margin-bottom: 10px;
-    padding: 6px 8px;
-    width: 250px;
-    border: 1px solid #80b380;
-    border-radius: 4px;
-  }
-  .pagination {
-    margin-top: 10px;
-  }
-  .pagination button {
-    background-color: #b3d9b3;
-    border: 1px solid #80b380;
-    color: #264d26;
-    padding: 4px 8px;
-    margin-right: 4px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 11px;
-  }
-  .pagination button:disabled {
-    background-color: #d9ead9;
-    color: #a3bfa3;
-    cursor: default;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Tampilkan Data Google Sheets</title>
 </head>
 <body>
+  <h2>Data dari Google Sheets</h2>
+  <table id="data-table" border="1" cellpadding="5" cellspacing="0">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
 
-<h2>Data dari Google Sheets</h2>
-<input type="text" id="searchInput" placeholder="Cari..." />
+  <script>
+    // URL CSV publik Google Sheets
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv';
 
-<table id="dataTable">
-  <thead><tr id="tableHeader"></tr></thead>
-  <tbody id="tableBody"></tbody>
-</table>
-
-<div class="pagination" id="pagination"></div>
-
-<script>
-// Link CSV Google Sheets publik
-const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv';
-
-let allData = [];
-let filteredData = [];
-const rowsPerPage = 10;
-let currentPage = 1;
-
-const tableHeader = document.getElementById('tableHeader');
-const tableBody = document.getElementById('tableBody');
-const pagination = document.getElementById('pagination');
-const searchInput = document.getElementById('searchInput');
-
-// Fungsi parse CSV ke array
-function parseCSV(csvText) {
-  const lines = csvText.trim().split('\n');
-  return lines.map(line => {
-    // split CSV dengan handling sederhana koma di dalam tanda kutip tidak dipertimbangkan (asumsi CSV simpel)
-    return line.split(',');
-  });
-}
-
-// Render header tabel
-function renderTableHeader(headerRow) {
-  tableHeader.innerHTML = '';
-  headerRow.forEach(headCell => {
-    const th = document.createElement('th');
-    th.textContent = headCell;
-    tableHeader.appendChild(th);
-  });
-}
-
-// Render isi tabel halaman sekarang
-function renderTableBody(data) {
-  tableBody.innerHTML = '';
-  data.forEach(row => {
-    const tr = document.createElement('tr');
-    row.forEach(cell => {
-      const td = document.createElement('td');
-      td.textContent = cell;
-      tr.appendChild(td);
-    });
-    tableBody.appendChild(tr);
-  });
-}
-
-// Render pagination buttons
-function renderPagination(totalRows) {
-  pagination.innerHTML = '';
-  const totalPages = Math.ceil(totalRows / rowsPerPage);
-  if (totalPages <= 1) return;
-
-  // Tombol Prev
-  const btnPrev = document.createElement('button');
-  btnPrev.textContent = '‹ Prev';
-  btnPrev.disabled = currentPage === 1;
-  btnPrev.onclick = () => {
-    if (currentPage > 1) {
-      currentPage--;
-      updateTable();
+    // Fungsi parse CSV sederhana ke array
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      return lines.map(line => line.split(','));
     }
-  };
-  pagination.appendChild(btnPrev);
 
-  // Tombol nomor halaman (bisa dibatasi maksimal 5 halaman tampil)
-  let startPage = Math.max(1, currentPage - 2);
-  let endPage = Math.min(totalPages, startPage + 4);
-  if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
+    // Render tabel dari array data
+    function renderTable(data) {
+      const thead = document.querySelector('#data-table thead');
+      const tbody = document.querySelector('#data-table tbody');
+      
+      // Clear table dulu
+      thead.innerHTML = '';
+      tbody.innerHTML = '';
 
-  for (let i = startPage; i <= endPage; i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    if (i === currentPage) {
-      btn.disabled = true;
-      btn.style.fontWeight = 'bold';
+      // Header (baris pertama)
+      const headerRow = document.createElement('tr');
+      data[0].forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+
+      // Body (data baris berikutnya)
+      for (let i = 1; i < data.length; i++) {
+        const row = document.createElement('tr');
+        data[i].forEach(cellText => {
+          const td = document.createElement('td');
+          td.textContent = cellText;
+          row.appendChild(td);
+        });
+        tbody.appendChild(row);
+      }
     }
-    btn.onclick = () => {
-      currentPage = i;
-      updateTable();
-    };
-    pagination.appendChild(btn);
-  }
 
-  // Tombol Next
-  const btnNext = document.createElement('button');
-  btnNext.textContent = 'Next ›';
-  btnNext.disabled = currentPage === totalPages;
-  btnNext.onclick = () => {
-    if (currentPage < totalPages) {
-      currentPage++;
-      updateTable();
-    }
-  };
-  pagination.appendChild(btnNext);
-}
-
-// Update tabel berdasarkan halaman dan filter
-function updateTable() {
-  const startIdx = (currentPage - 1) * rowsPerPage;
-  const pageData = filteredData.slice(startIdx, startIdx + rowsPerPage);
-  renderTableBody(pageData);
-  renderPagination(filteredData.length);
-}
-
-// Filter data berdasarkan search input
-function applySearchFilter() {
-  const term = searchInput.value.toLowerCase();
-  if (!term) {
-    filteredData = allData.slice(1); // kecuali header
-  } else {
-    filteredData = allData.slice(1).filter(row => row.some(cell => cell.toLowerCase().includes(term)));
-  }
-  currentPage = 1;
-  updateTable();
-}
-
-// Load CSV dan render tabel
-fetch(csvUrl)
-  .then(response => response.text())
-  .then(csvText => {
-    allData = parseCSV(csvText);
-    renderTableHeader(allData[0]);
-    filteredData = allData.slice(1);
-    updateTable();
-  })
-  .catch(err => {
-    tableBody.innerHTML = `<tr><td colspan="100%">Gagal memuat data: ${err.message}</td></tr>`;
-  });
-
-searchInput.addEventListener('input', () => {
-  applySearchFilter();
-});
-</script>
-
+    // Ambil data CSV dan tampilkan
+    fetch(csvUrl)
+      .then(response => response.text())
+      .then(text => {
+        const data = parseCSV(text);
+        renderTable(data);
+      })
+      .catch(err => {
+        console.error('Gagal ambil data:', err);
+        document.body.innerHTML += '<p>Gagal mengambil data.</p>';
+      });
+  </script>
 </body>
 </html>
