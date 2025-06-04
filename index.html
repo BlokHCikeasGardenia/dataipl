@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Data IPL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Responsive for mobile -->
+  <title>Data Google Sheets Live</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -39,7 +39,6 @@
       white-space: nowrap;
       box-sizing: border-box;
     }
-    /* Border sticky col fix */
     th.sticky-col-1, td.sticky-col-1,
     th.sticky-col-2, td.sticky-col-2 {
       box-shadow: 1px 0 0 0 #a5d6a7;
@@ -97,6 +96,7 @@
     .filters label {
       font-size: 0.97em;
       margin-right: 2px;
+      white-space: nowrap;
     }
     #searchInput {
       padding: 5px 8px;
@@ -115,6 +115,9 @@
       border: 1px solid #b0bec5;
       min-width: 0;
       box-sizing: border-box;
+      width: auto;
+      max-width: 110px;
+      display: inline-block;
     }
     .pagination {
       margin-top: 6px;
@@ -157,12 +160,16 @@
       select {
         font-size: 11px;
         padding: 3px 5px;
+        width: auto;
+        max-width: 85px;
+        min-width: 0;
+        display: inline-block;
       }
     }
   </style>
 </head>
 <body>
-  <h2>Data IPL</h2>
+  <h2>Data Google Sheets (Live)</h2>
 
   <div class="filters">
     <input type="text" id="searchInput" placeholder="Cari...">
