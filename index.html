@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Data IPL</title>
+  <title>Data Google Sheets Live</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -57,9 +57,9 @@
     td:not(.sticky-col-1):not(.sticky-col-2) {
       text-align: right;
     }
-    /* Kolom ke-3 (idx 2 di visibleIndexes) dibuat lebar tetap */
+    /* Kolom ke-2 (idx 1 di visibleIndexes) dibuat lebar tetap */
     th.fixed-width-col, td.fixed-width-col {
-      width: 90px; /* 10 karakter x ~9px (Arial, 12px) */
+      width: 90px;
       min-width: 90px;
       max-width: 90px;
       overflow: hidden;
@@ -94,7 +94,7 @@
   </style>
 </head>
 <body>
-  <h2>Data IPL</h2>
+  <h2>Data Google Sheets (Live)</h2>
 
   <input type="text" id="searchInput" placeholder="Cari...">
   <label for="rowsPerPage">Baris per halaman:</label>
@@ -146,11 +146,9 @@
       visibleIndexes.forEach((i, idx) => {
         const th = document.createElement('th');
         th.textContent = headerRow[i];
-        // sticky col
         if (idx === 0) th.classList.add('sticky-col-1');
-        if (idx === 1) th.classList.add('sticky-col-2');
-        // fixed-width untuk kolom ke-3 di tampilan (idx === 2)
-        if (idx === 2) th.classList.add('fixed-width-col');
+        if (idx === 1) th.classList.add('sticky-col-2', 'fixed-width-col');
+        if (idx === 2) ; // tidak fixed width untuk idx 2
         trHead.appendChild(th);
       });
       thead.appendChild(trHead);
@@ -167,8 +165,8 @@
           const td = document.createElement('td');
           td.textContent = row[i];
           if (idx === 0) td.classList.add('sticky-col-1');
-          if (idx === 1) td.classList.add('sticky-col-2');
-          if (idx === 2) td.classList.add('fixed-width-col');
+          if (idx === 1) td.classList.add('sticky-col-2', 'fixed-width-col');
+          if (idx === 2) ; // tidak fixed width untuk idx 2
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
