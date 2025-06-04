@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Data IPL</title>
+  <title>Data Google Sheets - IPL</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -78,10 +78,12 @@
   </style>
 </head>
 <body>
-  <h1>Data IPL</h1>
+  <h1>Data IPL dari Google Sheets</h1>
   <input type="text" id="search" placeholder="Cari... (otomatis filter)">
   <div id="table-container">Memuat data...</div>
 
+  <!-- PapaParse -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv";
 
@@ -90,9 +92,9 @@
     fetch(csvUrl)
       .then(response => response.text())
       .then(csv => {
-        const rows = csv.trim().split("\n").map(row => row.split(","));
-        originalRows = rows;
-        renderTable(rows);
+        const parsed = Papa.parse(csv, { skipEmptyLines: true });
+        originalRows = parsed.data;
+        renderTable(originalRows);
       })
       .catch(error => {
         document.getElementById("table-container").textContent = "Gagal memuat data.";
@@ -104,7 +106,6 @@
       const thead = document.createElement("thead");
       const tbody = document.createElement("tbody");
 
-      // Header
       const headerRow = document.createElement("tr");
       rows[0].forEach(header => {
         const th = document.createElement("th");
@@ -113,7 +114,6 @@
       });
       thead.appendChild(headerRow);
 
-      // Data rows
       rows.slice(1).forEach(row => {
         const tr = document.createElement("tr");
         row.forEach((cell, i) => {
@@ -127,6 +127,7 @@
 
       table.appendChild(thead);
       table.appendChild(tbody);
+
       const container = document.getElementById("table-container");
       container.innerHTML = "";
       container.appendChild(table);
@@ -135,7 +136,7 @@
     document.getElementById("search").addEventListener("input", function() {
       const searchTerm = this.value.toLowerCase();
       const filtered = originalRows.filter((row, index) => {
-        if (index === 0) return true; // keep header
+        if (index === 0) return true;
         return row.some(cell => cell.toLowerCase().includes(searchTerm));
       });
       renderTable(filtered);
