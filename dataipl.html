@@ -2,31 +2,45 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Tampilkan Data Google Sheets</title>
+  <title>Tampilkan Data Google Sheets dengan PapaParse</title>
 </head>
 <body>
-  <h2>Data dari Google Sheets</h2>
+  <h2>Data dari Google Sheets (PapaParse)</h2>
   <table id="data-table" border="1" cellpadding="5" cellspacing="0">
     <thead></thead>
     <tbody></tbody>
   </table>
 
+  <!-- Load PapaParse dari CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
   <script>
-    // URL CSV publik Google Sheets
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv';
 
-    // Fungsi parse CSV sederhana ke array
-    function parseCSV(text) {
-      const lines = text.trim().split('\n');
-      return lines.map(line => line.split(','));
-    }
+    fetch(csvUrl)
+      .then(response => response.text())
+      .then(csvText => {
+        // Parse CSV pakai PapaParse
+        const results = Papa.parse(csvText, {
+          header: false,
+          skipEmptyLines: true
+        });
 
-    // Render tabel dari array data
+        // Ambil data array 2D
+        const data = results.data;
+
+        // Render tabel
+        renderTable(data);
+      })
+      .catch(err => {
+        console.error('Gagal ambil atau parse CSV:', err);
+        document.body.innerHTML += '<p>Gagal mengambil data.</p>';
+      });
+
     function renderTable(data) {
       const thead = document.querySelector('#data-table thead');
       const tbody = document.querySelector('#data-table tbody');
-      
-      // Clear table dulu
+
       thead.innerHTML = '';
       tbody.innerHTML = '';
 
@@ -39,8 +53,8 @@
       });
       thead.appendChild(headerRow);
 
-      // Body (data baris berikutnya)
-      for (let i = 1; i < data.length; i++) {
+      // Body (baris selanjutnya)
+      for(let i = 1; i < data.length; i++) {
         const row = document.createElement('tr');
         data[i].forEach(cellText => {
           const td = document.createElement('td');
@@ -50,18 +64,6 @@
         tbody.appendChild(row);
       }
     }
-
-    // Ambil data CSV dan tampilkan
-    fetch(csvUrl)
-      .then(response => response.text())
-      .then(text => {
-        const data = parseCSV(text);
-        renderTable(data);
-      })
-      .catch(err => {
-        console.error('Gagal ambil data:', err);
-        document.body.innerHTML += '<p>Gagal mengambil data.</p>';
-      });
   </script>
 </body>
 </html>
