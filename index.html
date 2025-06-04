@@ -2,122 +2,98 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Data IPL</title>
+  <title>Pemasukan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f0fcfc;
       font-size: 12px;
       padding: 10px;
-      background: #f0fdf4;
     }
     h2 {
       text-align: center;
-      color: #2e7d32;
-      font-size: 1.2rem;
-    }
-    .table-container {
-      overflow-x: auto;
-      overflow-y: auto;
-      max-height: 60vh;
-      margin-bottom: 12px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      background: #e8f5e9;
-      min-width: 500px;
-      font-size: 10.5px; /* Ukuran font isi tabel desktop diperkecil */
-    }
-    th, td {
-      border: 1px solid #a5d6a7;
-      padding: 6px 8px;
-      background: inherit;
-      white-space: nowrap;
-      box-sizing: border-box;
-    }
-    th.sticky-col-1, td.sticky-col-1,
-    th.sticky-col-2, td.sticky-col-2 {
-      box-shadow: 1px 0 0 0 #a5d6a7;
-    }
-    th {
-      background-color: #66bb6a;
-      color: #222 !important;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-    }
-    th.sticky-col-1, th.sticky-col-2 {
-      z-index: 10;
-      text-align: left;
-    }
-    th:not(.sticky-col-1):not(.sticky-col-2) {
-      text-align: right;
-    }
-    td.sticky-col-1, td.sticky-col-2 {
-      position: sticky;
-      z-index: 6;
-      text-align: left;
-    }
-    td.sticky-col-1 { left: 0; }
-    th.sticky-col-1 { left: 0; }
-    td.sticky-col-2, th.sticky-col-2 { /* left diatur dinamis lewat JS */ }
-    td:not(.sticky-col-1):not(.sticky-col-2) {
-      text-align: right;
-    }
-    th.fixed-width-col,
-    td.fixed-width-col {
-      width: 90px;
-      min-width: 90px;
-      max-width: 90px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    tr:nth-child(even) {
-      background-color: #f1f8e9;
-    }
-    tr:nth-child(odd) {
-      background-color: #e8f5e9;
+      color: #009688;
+      font-size: 1.35rem;
+      margin-bottom: 1em;
     }
     .filters {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       align-items: center;
-      margin-bottom: 8px;
-      justify-content: space-between;
-      max-width: 480px;
-      margin-left: auto;
-      margin-right: auto;
+      margin-bottom: 10px;
+      justify-content: center;
     }
     .filters label {
-      font-size: 0.97em;
+      font-size: 13px;
       margin-right: 2px;
       white-space: nowrap;
+      color: #00897b;
     }
-    #searchInput {
-      padding: 5px 8px;
-      border: 1px solid #b0bec5;
-      border-radius: 4px;
-      font-size: 13px;
-      min-width: 0;
-      width: 100%;
-      max-width: 180px;
-      box-sizing: border-box;
-    }
-    select {
+    .filters input, .filters select {
       font-size: 12px;
       padding: 3px 6px;
-      border-radius: 4px;
-      border: 1px solid #b0bec5;
+      border: 1px solid #64b5b7;
+      border-radius: 3px;
+      background: #e6f8f8;
       min-width: 0;
-      box-sizing: border-box;
       width: auto;
-      max-width: 110px;
-      display: inline-block;
+      box-sizing: border-box;
+    }
+    .table-container {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 55vh;
+      margin-bottom: 12px;
+      background: #e6f8f8;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(100,181,183,0.07);
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: #e6f8f8;
+      min-width: 600px;
+      font-size: 11.5px;
+    }
+    th, td {
+      border: 1px solid #b2dfdb;
+      padding: 6px 8px;
+      background: inherit;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+    th {
+      background: #7be3e6;
+      color: #00695c;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      user-select: none;
+    }
+    th.sortable {
+      cursor: pointer;
+    }
+    .sort-icon {
+      font-size: 12px;
+      margin-left: 3px;
+      color: #ff9800;
+      vertical-align: middle;
+      font-weight: bold;
+    }
+    .sort-icon.inactive {
+      color: #bdbdbd;
+      font-weight: normal;
+    }
+    .hidden-col {
+      display: none;
+    }
+    tr:nth-child(even) td {
+      background-color: #def7f8;
+    }
+    tr:nth-child(odd) td {
+      background-color: #e6f8f8;
     }
     .pagination {
       margin-top: 6px;
@@ -129,21 +105,24 @@
       padding: 4px 8px;
       font-size: 12px;
       border-radius: 4px;
-      border: 1px solid #b0bec5;
+      border: 1px solid #64b5b7;
       background: #fff;
+      color: #009688;
       cursor: pointer;
+      transition: background 0.2s;
     }
-    .pagination button[disabled] {
-      background: #b2dfdb;
-      color: #333;
+    .pagination button[disabled], .pagination button.active {
+      background: #7be3e6;
+      color: #004d40;
       cursor: default;
+      font-weight: bold;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       .table-container {
-        max-height: 54vh;
+        max-height: 40vh;
       }
       table {
-        font-size: 11px;
+        font-size: 10.5px;
         min-width: 350px;
       }
       .filters {
@@ -152,167 +131,178 @@
         gap: 4px;
         max-width: 98vw;
       }
-      #searchInput {
-        max-width: 120px;
-        font-size: 12px;
-        padding: 5px 6px;
+      .filters input, .filters select {
+        width: 98vw;
+        margin-bottom: 6px;
       }
-      select {
+    }
+    @media (max-width: 450px) {
+      table {
+        font-size: 10px;
+        min-width: 320px;
+      }
+      th, td {
+        padding: 4px 4px;
+      }
+      .filters input, .filters select {
         font-size: 11px;
-        padding: 3px 5px;
-        width: auto;
-        max-width: 85px;
-        min-width: 0;
-        display: inline-block;
+        padding: 3px 4px;
       }
     }
   </style>
 </head>
 <body>
-  <h2>Data IPL</h2>
-
+  <h2>Pemasukan</h2>
   <div class="filters">
-    <input type="text" id="searchInput" placeholder="Cari...">
-    <label for="rowsPerPage">Baris per halaman:</label>
+    <input type="text" id="searchInput" placeholder="Cari di semua kolom...">
+    <label for="rowsPerPage">Baris/halaman:</label>
     <select id="rowsPerPage">
-      <option value="10" selected>10</option>
-      <option value="25">25</option>
+      <option value="5">5</option>
+      <option value="8" selected>8</option>
+      <option value="10">10</option>
+      <option value="15">15</option>
+      <option value="20">20</option>
       <option value="50">50</option>
     </select>
   </div>
-
   <div class="table-container">
-    <table id="dataTable"></table>
+    <table id="mainTable"></table>
   </div>
-
   <div class="pagination" id="pagination"></div>
-
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv";
+    // Konfigurasi
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=1413460683&single=true&output=csv";
+    let rowsPerPage = 8;
+    let tableData = [], filteredData = [], sortCol = null, sortDir = 1, currentPage = 1;
 
-    let allFullRows = [];
-    let header = [];
-    let currentPage = 1;
-    let rowsPerPage = 10;
+    // Kolom yang di-sort (0-based: 1, 4, 5)
+    const sortableCols = [1,4,5];
+    // Kolom yang disembunyikan (0-based: 0 dan 7)
+    const hiddenCols = [0,7];
 
-    const table = document.getElementById('dataTable');
-    const pagination = document.getElementById('pagination');
-    const searchInput = document.getElementById('searchInput');
-    const rowsPerPageSelect = document.getElementById('rowsPerPage');
-
-    fetch(csvUrl)
-      .then(res => res.text())
-      .then(csv => {
-        const rows = csv.trim().split('\n').map(row => row.split(','));
-        header = rows[0];
-        const data = rows.slice(1);
-        allFullRows = data;
-
-        renderTable(header, data);
-        setupEvents();
-      });
-
-    function renderTable(headerRow, data) {
+    function renderTable() {
+      const table = document.getElementById('mainTable');
       table.innerHTML = '';
+      if (!filteredData.length) return;
+
+      // Header
       const thead = document.createElement('thead');
-      const trHead = document.createElement('tr');
-
-      // Kolom yang ingin ditampilkan (selain index 0 dan 3)
-      const visibleIndexes = headerRow.map((_, i) => i).filter(i => i !== 0 && i !== 3);
-
-      visibleIndexes.forEach((i, idx) => {
+      const headRow = document.createElement('tr');
+      filteredData[0].forEach((cell, i) => {
         const th = document.createElement('th');
-        th.textContent = headerRow[i];
-        if (idx === 0) th.classList.add('sticky-col-1');
-        if (idx === 1) th.classList.add('sticky-col-2', 'fixed-width-col');
-        trHead.appendChild(th);
+        th.textContent = cell;
+        if (sortableCols.includes(i)) {
+          th.classList.add('sortable');
+          th.onclick = () => sortTable(i);
+          th.title = "Klik untuk urutkan";
+          // Icon sort
+          const up = document.createElement('span');
+          up.className = "sort-icon" + ((sortCol === i && sortDir === 1) ? "" : " inactive");
+          up.innerHTML = "▲";
+          const down = document.createElement('span');
+          down.className = "sort-icon" + ((sortCol === i && sortDir === -1) ? "" : " inactive");
+          down.innerHTML = "▼";
+          th.appendChild(up);
+          th.appendChild(down);
+        }
+        if (hiddenCols.includes(i)) th.classList.add('hidden-col');
+        headRow.appendChild(th);
       });
-      thead.appendChild(trHead);
+      thead.appendChild(headRow);
       table.appendChild(thead);
 
-      const start = (currentPage - 1) * rowsPerPage;
-      const end = start + rowsPerPage;
-      const currentData = data.slice(start, end);
-
+      // Body
       const tbody = document.createElement('tbody');
-      currentData.forEach(row => {
+      const startIdx = (currentPage - 1) * rowsPerPage + 1; // +1 untuk header
+      const endIdx = Math.min(startIdx + rowsPerPage - 1, filteredData.length -1);
+      for (let i = startIdx; i <= endIdx; i++) {
+        const row = filteredData[i];
+        if (!row) continue;
         const tr = document.createElement('tr');
-        visibleIndexes.forEach((i, idx) => {
+        row.forEach((cell, j) => {
           const td = document.createElement('td');
-          td.textContent = row[i];
-          if (idx === 0) td.classList.add('sticky-col-1');
-          if (idx === 1) td.classList.add('sticky-col-2', 'fixed-width-col');
+          td.textContent = cell;
+          if (hiddenCols.includes(j)) td.classList.add('hidden-col');
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
-      });
+      }
       table.appendChild(tbody);
 
-      renderPagination(data.length);
-
-      // Atur posisi left sticky kolom 2 & 3 secara dinamis
-      setTimeout(setStickyLeft, 0);
+      renderPagination();
     }
 
-    function setStickyLeft() {
-      // Cari semua th sticky
-      const th1 = table.querySelector('th.sticky-col-1');
-      const th2 = table.querySelector('th.sticky-col-2');
-      if (!th1 || !th2) return;
-
-      const width1 = th1.offsetWidth;
-
-      // Set left untuk sticky-col-2 agar tepat setelah sticky-col-1
-      th2.style.left = width1 + "px";
-
-      // Semua td di kolom 2 dan 3
-      const trs = table.querySelectorAll('tbody tr');
-      trs.forEach(tr => {
-        const tds = tr.querySelectorAll('td');
-        if (tds.length > 1) {
-          tds[1].style.left = width1 + 'px';
-        }
-      });
-    }
-
-    function renderPagination(totalRows) {
-      pagination.innerHTML = '';
-      const totalPages = Math.ceil(totalRows / rowsPerPage);
+    function renderPagination() {
+      const totalRows = filteredData.length - 1; // header tidak dihitung
+      const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+      const pag = document.getElementById('pagination');
+      pag.innerHTML = '';
+      if (totalPages <= 1) return;
 
       for (let i = 1; i <= totalPages; i++) {
         const btn = document.createElement('button');
         btn.textContent = i;
+        if (i === currentPage) btn.classList.add('active');
         btn.disabled = i === currentPage;
-        btn.onclick = () => {
-          currentPage = i;
-          applyFilters();
-        };
-        pagination.appendChild(btn);
+        btn.onclick = () => { currentPage = i; renderTable(); };
+        pag.appendChild(btn);
       }
     }
 
-    function setupEvents() {
-      searchInput.addEventListener('input', () => {
-        currentPage = 1;
-        applyFilters();
-      });
-
-      rowsPerPageSelect.addEventListener('change', () => {
-        rowsPerPage = parseInt(rowsPerPageSelect.value);
-        currentPage = 1;
-        applyFilters();
-      });
-    }
-
-    function applyFilters() {
-      const keyword = searchInput.value.toLowerCase();
-      const filtered = allFullRows.filter(row =>
-        row.some(cell => cell.toLowerCase().includes(keyword))
+    function sortTable(colIdx) {
+      if (sortCol === colIdx) sortDir *= -1;
+      else { sortCol = colIdx; sortDir = 1; }
+      filteredData = [filteredData[0]].concat(
+        filteredData.slice(1).sort((a, b) => {
+          let x = a[colIdx] || '', y = b[colIdx] || '';
+          // Coba sort numerik jika memungkinkan
+          let nx = parseFloat(x.replace(/[^0-9.-]/g, '')), ny = parseFloat(y.replace(/[^0-9.-]/g, ''));
+          if (!isNaN(nx) && !isNaN(ny)) return (nx - ny) * sortDir;
+          return x.localeCompare(y, 'id', {sensitivity:'base'}) * sortDir;
+        })
       );
-      renderTable(header, filtered);
+      currentPage = 1;
+      renderTable();
     }
 
-    window.addEventListener('resize', () => setStickyLeft());
+    function filterData(keyword) {
+      keyword = keyword.toLowerCase();
+      filteredData = [tableData[0]];
+      for (let i = 1; i < tableData.length; i++) {
+        const row = tableData[i];
+        if (!row) continue;
+        // Semua kolom termasuk yang hidden tetap searchable
+        if (row.some(cell => (cell || '').toLowerCase().includes(keyword))) {
+          filteredData.push(row);
+        }
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+      filterData(this.value);
+      currentPage = 1;
+      renderTable();
+    });
+
+    document.getElementById('rowsPerPage').addEventListener('change', function() {
+      rowsPerPage = parseInt(this.value, 10);
+      currentPage = 1;
+      renderTable();
+    });
+
+    // Ambil & parsing CSV
+    fetch(csvUrl)
+      .then(res => res.text())
+      .then(csvText => {
+        Papa.parse(csvText, {
+          complete: function(results) {
+            tableData = results.data.filter(row => row.length > 1 && row.some(cell => cell !== ""));
+            filteredData = tableData.slice();
+            renderTable();
+          }
+        });
+      });
   </script>
 </body>
 </html>
