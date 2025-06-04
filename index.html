@@ -34,25 +34,26 @@
     }
     th {
       background-color: #66bb6a;
-      color: white;
+      color: #222 !important; /* header font hitam */
       position: sticky;
       top: 0;
       z-index: 2;
     }
-    /* Sticky kolom 2 (idx 0) dan kolom 3 (idx 1), left diatur via JS agar dinamis */
+    /* Sticky kolom 2 dan 3, left diatur via JS agar dinamis, tidak beda warna */
     th.sticky-col-1, td.sticky-col-1 {
       position: sticky;
       left: 0;
       z-index: 3;
-      background: #b2dfdb;
     }
     th.sticky-col-2, td.sticky-col-2 {
       position: sticky;
       z-index: 3;
-      background: #c8e6c9;
     }
     tr:nth-child(even) {
       background-color: #f1f8e9;
+    }
+    tr:nth-child(odd) {
+      background-color: #e8f5e9;
     }
     input[type="text"] {
       padding: 5px;
@@ -112,7 +113,6 @@
         const rows = csv.trim().split('\n').map(row => row.split(','));
         header = rows[0];
         const data = rows.slice(1);
-
         allFullRows = data;
 
         renderTable(header, data);
