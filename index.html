@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Data IPL</title>
+  <title>Data Google Sheets Live</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -62,7 +62,7 @@
   </style>
 </head>
 <body>
-  <h2>Data IPL</h2>
+  <h2>Data Google Sheets (Live)</h2>
 
   <input type="text" id="searchInput" placeholder="Cari...">
   <label for="rowsPerPage">Baris per halaman:</label>
@@ -81,7 +81,7 @@
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRQBSWp7dBKus6wO8G-vBtSW9ZpKlRbmNLbXsaWQZeaQU_ZEY9p9EujIGTyIPVzb5cgVTlq9d0Lf29P/pub?gid=186945041&single=true&output=csv";
 
-    let allRows = [];
+    let allFullRows = []; // menyimpan semua data (untuk search)
     let currentPage = 1;
     let rowsPerPage = 10;
 
@@ -97,24 +97,23 @@
         const header = rows[0];
         const data = rows.slice(1);
 
-        // Sembunyikan kolom ke-1 (index 0) dan ke-4 (index 3)
-        const visibleCols = header.map((_, i) => i).filter(i => i !== 0 && i !== 3);
+        allFullRows = data;
 
-        // Simpan data yang sudah difilter kolomnya
-        allRows = data.map(row => visibleCols.map(i => row[i]));
-        const visibleHeader = visibleCols.map(i => header[i]);
-
-        renderTable(visibleHeader, allRows);
-        setupEvents(visibleHeader);
+        renderTable(header, data);
+        setupEvents(header);
       });
 
     function renderTable(header, data) {
       table.innerHTML = '';
       const thead = document.createElement('thead');
       const trHead = document.createElement('tr');
-      header.forEach(col => {
+
+      // Kolom yang ingin ditampilkan (selain index 0 dan 3)
+      const visibleIndexes = header.map((_, i) => i).filter(i => i !== 0 && i !== 3);
+
+      visibleIndexes.forEach(i => {
         const th = document.createElement('th');
-        th.textContent = col;
+        th.textContent = header[i];
         trHead.appendChild(th);
       });
       thead.appendChild(trHead);
@@ -127,9 +126,9 @@
       const tbody = document.createElement('tbody');
       currentData.forEach(row => {
         const tr = document.createElement('tr');
-        row.forEach(cell => {
+        visibleIndexes.forEach(i => {
           const td = document.createElement('td');
-          td.textContent = cell;
+          td.textContent = row[i];
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -170,13 +169,12 @@
 
     function applyFilters() {
       const keyword = searchInput.value.toLowerCase();
-      const filtered = allRows.filter(row =>
+
+      const filtered = allFullRows.filter(row =>
         row.some(cell => cell.toLowerCase().includes(keyword))
       );
-      renderTable(
-        Array.from(table.querySelectorAll('thead th')).map(th => th.textContent),
-        filtered
-      );
+
+      renderTable(allFullRows[0].map((_, i) => i).map(i => ''), filtered); // render ulang, header tetap
     }
   </script>
 </body>
