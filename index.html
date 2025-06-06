@@ -308,8 +308,8 @@
       const thead = document.createElement('thead');
       const trHead = document.createElement('tr');
 
-      // Kolom yang ingin ditampilkan (selain index 0 dan 3)
-      const visibleIndexes = headerRow.map((_, i) => i).filter(i => i !== 0 && i !== 3);
+      // Kolom yang ingin ditampilkan (selain index 0 saja)
+      const visibleIndexes = headerRow.map((_, i) => i).filter(i => i !== 0);
 
       visibleIndexes.forEach((i, idx) => {
         const th = document.createElement('th');
